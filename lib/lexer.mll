@@ -28,6 +28,10 @@ let stoi s =
 
 }
 
+let lid = ['a'-'z'] ['_' 'a'-'z' 'A'-'Z' '0'-'9']*
+
+let uid = ['A'-'Z'] ['_' 'a'-'z' 'A'-'Z' '0'-'9' ]*
+
 let int = ['0'-'9'] ['0'-'9' '_']*
 
 let int_ =
@@ -40,8 +44,6 @@ let float =
   (('.' ['0'-'9' '_']*) (['e' 'E'] ['+' '-']? ['0'-'9'] ['0'-'9' '_']*)? |
    ('.' ['0'-'9' '_']*)? (['e' 'E'] ['+' '-']? ['0'-'9'] ['0'-'9' '_']*))
 
-
-let ident =  ['a'-'z' 'A'-'Z'] ['_' 'a'-'z' 'A'-'Z' '0'-'9' '\'']*
 
 rule token = parse
 | [' ' '\t' '\r']
@@ -188,9 +190,13 @@ rule token = parse
   { FLOAT (float_of_string f) }
 | '"'                 
   { STRING (string "" lexbuf) }
-| ident  as n
+| lid as l
   {
-    IDENT n
+    LID l
+  }
+| uid as u
+  {
+    UID u
   }
 | eof
   { EOF }

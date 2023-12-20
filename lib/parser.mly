@@ -7,13 +7,14 @@
 %token LET
 
 
-%token<string> IDENT STRING
+%token<string> UID LID STRING
 %token<bool> BOOL
 %token<int> INT
 %token<char> CHAR
 %token<float> FLOAT
 %token UNDERSCORE
 
+%token IMPL
 %token SELF
 %token CAST
 %token BREAK
@@ -102,9 +103,13 @@ definition_:
 | var_definition
 | struct_definition
 | enum_definition
+| impl_definition
     {}
 
-
+impl_definition:
+| IMPL generics_params? UID generics_params? LBRACE list(fn_spec SEMICOLON {}) RBRACE
+    {  }
+    
 function_definition:
 | fn_spec compound_statement
     {  }
@@ -118,7 +123,7 @@ generics_params:
   LT separated_list(COMMA, ty) GT
     {}
 decl:
-  IDENT COLON ty
+  LID COLON ty
     {}
 
 ret_ty:
@@ -141,8 +146,8 @@ enum_definition:
 
 
 tag_spec:
-|  IDENT
-|  IDENT LPAREN separated_list(COMMA, ty) RPAREN
+| UID
+| UID LPAREN separated_list(COMMA, ty) RPAREN
   {  }
 
 
@@ -151,19 +156,19 @@ fn_ty:
   {}
 
 fn_path:
-  FN IDENT generics_params
+  FN LID generics_params
   {}
 
 struct_path:
-  STRUCT IDENT generics_params
+  STRUCT UID generics_params
   {}
 
 enum_path:
-  ENUM IDENT generics_params
+  ENUM UID generics_params
   {}
 
 built_in_ty:
-| IDENT
+| UID generics_params?
 | BOOL
 | CHAR
 | INT
@@ -180,8 +185,6 @@ tuple:
 base_ty:
 | built_in_ty
 | LPAREN ty RPAREN
-| struct_path
-| enum_path
   {}
 
 ty_:
@@ -206,39 +209,48 @@ literal:
   {}
 
 field_expr:
-| "." IDENT EQ expr
-| field_expr SEMICOLON "." IDENT EQ expr
+| "." LID EQ expr
+| field_expr SEMICOLON "." LID EQ expr
   {}
 
 
 
 primary_expr:
-| IDENT
-| FN IDENT generics_params
+| LID
+| FN LID generics_params
 | LPAREN separated_list(COMMA,expr) RPAREN
-| LBRACE field_expr  RBRACE
+| LBRACE field_expr RBRACE
 | literal
     {}
 
 
-postfix_expr:
+postfix1_expr:
 | primary_expr
-| postfix_expr "[" expr "]"
-| postfix_expr "(" argument_expr_list? ")"
-| postfix_expr "." IDENT
-| postfix_expr "." FN IDENT generics_params 
-| postfix_expr "++"
-| postfix_expr "--"
-| postfix_expr DEREF
+| postfix1_expr "[" expr "]"
+| postfix1_expr "(" argument_expr_list? ")"
+| postfix1_expr "++"
+| postfix1_expr "--"
+| postfix1_expr DEREF
     {}
+
+postfix2_expr:
+| postfix1_expr
+| UID
+| UID LPAREN separated_list(COMMA,expr) RPAREN
+| postfix2_expr "." LID
+| postfix2_expr "." FN LID generics_params 
+| postfix2_expr "." LID "(" argument_expr_list? ")"
+| postfix2_expr "." FN LID generics_params "(" argument_expr_list? ")"
+  {}
+
 argument_expr_list:
 | assignment_expr
 | argument_expr_list "," assignment_expr
     {}
 
 unary_expr:
-| postfix_expr
-| unary_operator postfix_expr
+| postfix2_expr
+| unary_operator postfix2_expr
 | SIZEOF LPAREN ty RPAREN
     {}
 
@@ -395,14 +407,14 @@ iteration_statement:
 
 jump_statement:
 | CONTINUE ";"
-| BREAK IDENT ";"
+| BREAK ";"
 | RETURN expr? ";"
     {}
 
 patterrn:
 | literal
 | UNDERSCORE
-| IDENT
-| IDENT LPAREN separated_list(COMMA, patterrn) RPAREN
+| UID
+| UID LPAREN separated_list(COMMA, patterrn) RPAREN
 | LPAREN separated_list(COMMA, patterrn) RPAREN
   {}
