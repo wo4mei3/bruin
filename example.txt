@@ -29,5 +29,10 @@ impl Obj {
         let cls:fn(int) -> () = fn (a:int) -> () {
             ...
         }
+        switch e {
+            case _: {
+                
+            }
+        }
     } 
 }

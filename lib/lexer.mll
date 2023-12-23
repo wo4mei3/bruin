@@ -58,8 +58,6 @@ rule token = parse
   { STRUCT }
 | "enum"
   { ENUM }
-| "static"
-  { STATIC }
 | "const"
   { token lexbuf }
 | "if"
@@ -90,8 +88,6 @@ rule token = parse
   { MINUS }
 | '!'
   { BANG }
-| '?'
-  { QUESTION }
 | ':'
   { COLON }
 | "--"
@@ -128,7 +124,7 @@ rule token = parse
   { NE }
 | "="
   { EQ }
-| "+="
+(*| "+="
   { ADD_EQ }
 | "-="
   { SUB_EQ }
@@ -147,7 +143,7 @@ rule token = parse
 | "^="
   { XOR_EQ }
 | "|="
-  { OR_EQ }
+  { OR_EQ } *)
 | "<"
   { LT }
 | ">"

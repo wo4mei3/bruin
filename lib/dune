@@ -1,4 +1,6 @@
-(library
+(library 
+  (preprocess
+    (pps ppx_deriving.show))
  (name bruin))
 
 (menhir
