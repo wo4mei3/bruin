@@ -114,7 +114,7 @@ and def =
   | Defstruct of string * ty list * (string * ty) list
   | Defenum of string * ty list * (string * ty) list
   | Deffun of string *  ty list * ty * (string * ty) list * stmt
-  | Defmethod of string * ty list * ty * ty list * ty * (string * ty) list
+  | Defmethod of string * ty list * ty option * ty list * ty * (string * ty) list * stmt
 [@@deriving show]
 
 type dl = def list

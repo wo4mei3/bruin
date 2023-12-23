@@ -186,6 +186,16 @@ rule token = parse
   { FLOAT (float_of_string f) }
 | '"'                 
   { STRING (string "" lexbuf) }
+| "impl"
+  { IMPL }
+| "fn"
+  { FN }
+| "let"
+  { LET }
+| "int"
+  { TINT }
+| "_"
+  { UNDERSCORE }
 | lid as l
   {
     LID l

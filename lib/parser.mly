@@ -26,7 +26,7 @@
 %token SELF
 %token CAST
 *)
-%token BREAK
+%token BREAK TBOOL TINT TCHAR TFLOAT
 %token CASE
 %token CONST
 %token ELSE
@@ -111,8 +111,15 @@ def:
     { $1 }
 
 impl_def:
-| IMPL generics_params? UID generics_params? LBRACE list(function_def) RBRACE
+| IMPL generics_params? UID generics_params? LBRACE list(method_def) RBRACE
     { Defimpl(opt_to_list $2, Tconstr($3,opt_to_list $4),$6) }
+
+method_def:
+    FN generics_params? option(LPAREN ty RPAREN {$2 }) LID generics_params? LPAREN separated_list(COMMA, decl) RPAREN ret_ty? compound_statement
+    { 
+      Defmethod($4,opt_to_list $2,$3,opt_to_list $5,conv_ret $9,$7,$10)
+    }
+
 
 function_def:
 | fn_spec compound_statement
@@ -142,7 +149,6 @@ fn_spec:
       (name,tyl,conv_ret $5,$3)
     }
 
-
 struct_def:
 | struct_path LBRACE list(decl SEMICOLON { $1 }) RBRACE
    { let (name,tyl) = $1 in
@@ -151,7 +157,7 @@ struct_def:
 
 
 enum_def:
-| enum_path LBRACE separated_list(COMMA, tag_spec) RBRACE
+| enum_path LBRACE list(tag_spec SEMICOLON { $1 }) RBRACE
    { let (name,tyl) = $1 in
      Defenum(name,tyl,$3)
    }
@@ -182,10 +188,10 @@ enum_path:
 
 base_ty:
 | UID generics_params?  { Tconstr($1,opt_to_list $2) }
-| BOOL  { Tbool }
-| CHAR  { Tchar}
-| INT   { Tint }
-| FLOAT { Tfloat }
+| TBOOL  { Tbool }
+| TCHAR  { Tchar}
+| TINT   { Tint }
+| TFLOAT { Tfloat }
 | LPAREN ty COMMA separated_nonempty_list(COMMA,ty) RPAREN
   { Ttuple($2::$4) }
 | LPAREN ty RPAREN
