@@ -12,7 +12,7 @@ enum Option<T> {
 impl Obj {
     fn (Self*) method<T>(x:int, arr:int[]) -> T  {
         let ptr:int* = 0;
-        while b {
+        while a> b {
         }
         for i in l {
         }

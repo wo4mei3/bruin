@@ -1,5 +1,6 @@
 %{
   open Ast
+  open Ast.Expr
     let opt_to_list = function 
     | Some l -> l
     | None -> []
@@ -91,7 +92,7 @@
 %token EOF
 
 
-%start<def list> top
+%start<Expr.t def list> top
 %start<unit> expr_
 
 

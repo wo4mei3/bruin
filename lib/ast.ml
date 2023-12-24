@@ -1,8 +1,6 @@
-
 type link = Unbound of string | Linkto of ty [@@deriving show]
 
 and ty =
-  | Tunknown
   | Tvar of link ref
   | Tunit
   | Tbool
@@ -29,22 +27,7 @@ type constant =
   | Cchar of char
 [@@deriving show]
 
-and expr =
-  | Evar of ty list * string
-  | Econstant of constant
-  | Etuple of expr list
-  | EBinary of binary * expr * expr
-  | Eassign of expr * expr
-  | Etag of string
-  | Eunit
-  | Econstruct of string * expr
-  | EUnary of unary * expr
-  | ESizeof of ty
-  | EPostfix of expr * postfix
-  | Estruct of (string * expr) list
-[@@deriving show]
-
-and binary =
+type binary =
   | Add
   | Sub
   | Mul
@@ -69,9 +52,9 @@ and binary =
 and unary = Plus | Minus | BitNot | LogNot | Ref | Sizeof
 [@@deriving show]
 
-and postfix =
-  | PCall of expr list
-  | PIdx of expr
+and 'expr postfix =
+  | PCall of 'expr list
+  | PIdx of 'expr
   | PDot of ty list * string
   | PInc
   | PDec
@@ -93,29 +76,69 @@ and pat =
   | Precord of (string * pat) list
 [@@deriving show]
 
-and stmt =
-  | SLet of (string * ty) * expr
-  | SStmts of stmt list
-  | SWhile of expr * stmt
-  | SFor of expr * expr * stmt
-  | SIfElse of expr * stmt * stmt
-  | SReturn of expr option
+and 'expr stmt =
+  | SLet of (string * ty) * 'expr
+  | SStmts of 'expr stmt list
+  | SWhile of 'expr * 'expr stmt
+  | SFor of 'expr *'expr * 'expr stmt
+  | SIfElse of 'expr * 'expr stmt * 'expr stmt
+  | SReturn of 'expr option
   | SContinue
   | SBreak
-  | SSwitch of expr * (pat * stmt) list
-  | SExpr of expr
+  | SSwitch of 'expr * (pat * 'expr stmt) list
+  | SExpr of 'expr
   | SNone
 [@@deriving show]
 
 
-and def =
-  | Deflet of (string * ty) * expr
-  | Defimpl of ty list * ty * def list
+and 'expr def =
+  | Deflet of (string * ty) *'expr
+  | Defimpl of ty list * ty * 'expr def list
   | Defstruct of string * ty list * (string * ty) list
   | Defenum of string * ty list * (string * ty) list
-  | Deffun of string *  ty list * ty * (string * ty) list * stmt
-  | Defmethod of string * ty list * ty option * ty list * ty * (string * ty) list * stmt
+  | Deffun of string *  ty list * ty * (string * ty) list * 'expr stmt
+  | Defmethod of string * ty list * ty option * ty list * ty * (string * ty) list * 'expr stmt
 [@@deriving show]
 
-type dl = def list
+module Expr = struct
+type t =
+  | Evar of ty list * string
+  | Econstant of constant
+  | Etuple of t list
+  | EBinary of binary * t * t
+  | Eassign of t * t
+  | Etag of string
+  | Eunit
+  | Econstruct of string * t
+  | EUnary of unary * t
+  | ESizeof of ty
+  | EPostfix of t * t postfix
+  | Estruct of (string * t) list
 [@@deriving show]
+
+type  dl = t def list
+[@@deriving show]
+
+end
+
+module Typed_Expr = struct
+type t =
+  | Evar of ty* ty list * string
+  | Econstant of ty * constant
+  | Etuple of ty * t list
+  | EBinary of ty * binary * t * t
+  | Eassign of  ty * t * t
+  | Etag of ty * string
+  | Eunit of ty
+  | Econstruct of ty * string * t
+  | EUnary of ty * unary * t
+  | ESizeof of ty
+  | EPostfix of ty * t * t postfix
+  | Estruct of ty * (string * t) list
+[@@deriving show]
+
+
+type  dl = t def list
+[@@deriving show]
+
+end

@@ -1,9 +1,9 @@
-(library 
-  (preprocess
-    (pps ppx_deriving.show))
+(library
+ (preprocess
+  (pps ppx_deriving.show))
  (name bruin))
 
 (menhir
-  (modules parser))
-  
+ (modules parser))
+
 (ocamllex lexer)
