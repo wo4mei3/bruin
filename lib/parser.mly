@@ -1,5 +1,5 @@
 %{
-  open Ast
+  open Syntax
 
     let opt_to_list = function 
     | Some l -> l
