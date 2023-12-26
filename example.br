@@ -10,7 +10,7 @@ enum Option<T> {
 
 
 impl Obj {
-    fn (Self*) method<T>(x:int, arr:int[]) -> fn (T) -> fn(T) -> T  {
+    fn (Self*) method<T>(x:int, arr:int[]) -> T  {
         let ptr:int* = 0;
         while a> b {
         }

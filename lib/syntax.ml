@@ -11,8 +11,8 @@ type ty =
   | Tformat of ty * ty
   | Ttuple of ty list
   | Tconstr of string * ty list
-  | Tenum of string list * (string * ty) list
-  | Tstruct of string list * (string * ty) list
+  | Tenum of string * string list * (string * ty) list
+  | Tstruct of string * string list * (string * ty) list
   | Tfun of string list * ty * ty list
   | Ttag
 [@@deriving show]
