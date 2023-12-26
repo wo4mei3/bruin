@@ -1,7 +1,5 @@
-type link = Unbound of string | Linkto of ty [@@deriving show]
-
-and ty =
-  | Tvar of link ref
+type ty =
+  | Tvar of string
   | Tunit
   | Tbool
   | Tint
@@ -13,9 +11,9 @@ and ty =
   | Tformat of ty * ty
   | Ttuple of ty list
   | Tconstr of string * ty list
-  | Tenum of string * ty list * (string * ty) list
-  | Tstruct of string * ty list * (string * ty) list
-  | Tfun of ty list * ty * (string * ty) list
+  | Tenum of string list * (string * ty) list
+  | Tstruct of string list * (string * ty) list
+  | Tfun of string list * ty * ty list
   | Ttag
 [@@deriving show]
 
@@ -112,7 +110,6 @@ and 'expr def =
   | Deffun of string * ty list * ty * (string * ty) list * 'expr stmt
   | Defmethod of
       string
-      * ty list
       * ty option
       * ty list
       * ty

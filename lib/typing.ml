@@ -15,3 +15,18 @@ type expr =
 [@@deriving show]
 
 type dl = expr Syntax.def list [@@deriving show]
+
+(*
+
+let instantiate ty tparams =
+  match ty with
+  | Tconstr({contents = Unbound lname},tyl) ->
+
+let type_expr env = function
+| Syntax.Evar(tyl,name) -> 
+  let gen_ty = List.assoc name env in
+  let ty = instantiate gen_ty tyl in
+  Evar(ty,tyl,name)
+| _ -> Eunit Syntax.Tunit
+
+*)

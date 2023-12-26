@@ -116,11 +116,10 @@ impl_def:
     { Defimpl(opt_to_list $2, Tconstr($3,opt_to_list $4),$6) }
 
 method_def:
-    FN generics_params? option(LPAREN ty RPAREN {$2 }) LID generics_params? LPAREN separated_list(COMMA, decl) RPAREN ret_ty? compound_statement
+    FN option(LPAREN ty RPAREN {$2 }) LID generics_params? LPAREN separated_list(COMMA, decl) RPAREN ret_ty? compound_statement
     { 
-      Defmethod($4,opt_to_list $2,$3,opt_to_list $5,conv_ret $9,$7,$10)
+      Defmethod($3,$2,opt_to_list $4,conv_ret $8,$6,$9)
     }
-
 
 function_def:
 | fn_spec compound_statement
@@ -172,8 +171,8 @@ tag_spec:
 
 
 fn_ty:
- FN generics_params?  LPAREN separated_list(COMMA, decl) RPAREN ret_ty
-  { Tfun(opt_to_list $2,$6,$4) }
+ FN LPAREN separated_list(COMMA, ty) RPAREN ret_ty
+  { Tfun([],$5,$3) }
 
 fn_path:
   FN LID generics_params?
