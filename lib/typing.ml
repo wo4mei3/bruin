@@ -70,10 +70,9 @@ let rec tconstr_to_ty tyenv' = function
 | Syntax.Tlist ty' -> Syntax.Tlist (tconstr_to_ty tyenv' ty')
 | Syntax.Tptr ty' -> Syntax.Tptr (tconstr_to_ty tyenv' ty')
 | Syntax.Ttuple tyl -> Syntax.Ttuple (List.map (tconstr_to_ty tyenv') tyl)
-| Syntax.Tconstr(name,[]) -> Syntax.Tvar name
-(*| Syntax.Tconstr(name,tyl) -> 
+| Syntax.Tconstr(name,tyl) -> 
   let ty' = instantiate name tyl tyenv' in
-  tconstr_to_ty tyenv' ty'*)
+  tconstr_to_ty tyenv' ty'
 | Syntax.Tenum(name,tvars,fields') ->
   let fields = List.map (fun (name,ty')-> (name,tconstr_to_ty tyenv' ty')) fields' in
   Syntax.Tenum(name,tvars,fields)
@@ -86,7 +85,7 @@ let rec tconstr_to_ty tyenv' = function
   Syntax.Tfun(tvars,ret_ty,params)
 | ty -> ty
 
-(*
+
 let instantiate name tparams tyenv =
   match ty with
   | Syntax.Tconstr({contents = Unbound lname},tyl) ->
