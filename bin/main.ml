@@ -10,4 +10,4 @@ let () =
     let inchan = open_in fname in
     let filebuf = Lexing.from_channel inchan in
     let dl = Bruin.Parser.top Bruin.Lexer.token filebuf in
-    print_endline (Bruin.Syntax.show_dl dl)
+    print_endline (Bruin.Typing.show_stmt (Bruin.Typing.typing dl))

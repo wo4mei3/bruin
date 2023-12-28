@@ -169,12 +169,12 @@ tag_spec:
 | UID LPAREN ty COMMA separated_nonempty_list(COMMA, ty) RPAREN
   { ($1, Ttuple ($3::$5)) }
 
-(*
+
 fn_ty:
  FN LPAREN separated_list(COMMA, ty) RPAREN ret_ty
   { Tfun([],$5,$3) }
 
-*)
+
 
 fn_path:
   FN LID generics_params?
@@ -211,7 +211,7 @@ ty_:
 
 ty:
 | ty_ 
-(*| fn_ty*)
+| fn_ty
   { $1 }
 
 
