@@ -1,5 +1,4 @@
 type ty =
-  | Tvar of string
   | Tunit
   | Tbool
   | Tint
@@ -9,10 +8,10 @@ type ty =
   | Tlist of ty
   | Tptr of ty
   | Ttuple of ty list
-  | Tconstr of string * ty list
-  | Tenum of string * string list * (string * ty) list
-  | Tstruct of string * string list * (string * ty) list
-  | Tfun of string list * ty * ty list
+  | Tvar of string * ty list
+  | Tenum of string * ty list * (string * ty) list
+  | Tstruct of string * ty list * (string * ty) list
+  | Tfun of ty list * ty * ty list
   | Ttag
 [@@deriving show]
 

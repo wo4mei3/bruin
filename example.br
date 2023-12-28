@@ -1,6 +1,8 @@
-fn func<T,U>(e:Obj<T>) -> Obj<U> {
-    let ptr:int = 0;
+fn func(e:int) -> int {
+    let ptr:fn (int) -> int = func;
 }
+
+struct X {}
 
 struct Obj<T> {
    field:T;

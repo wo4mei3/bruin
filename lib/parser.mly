@@ -113,7 +113,7 @@ def:
 
 impl_def:
 | IMPL generics_params? UID generics_params? LBRACE list(method_def) RBRACE
-    { Defimpl(opt_to_list $2, Tconstr($3,opt_to_list $4),$6) }
+    { Defimpl(opt_to_list $2, Tvar($3,opt_to_list $4),$6) }
 
 method_def:
     FN option(LPAREN ty RPAREN {$2 }) LID generics_params? LPAREN separated_list(COMMA, decl) RPAREN ret_ty? compound_statement
@@ -171,8 +171,8 @@ tag_spec:
 
 
 fn_ty:
- FN LPAREN separated_list(COMMA, ty) RPAREN ret_ty
-  { Tfun([],$5,$3) }
+ FN generics_params? LPAREN separated_list(COMMA, ty) RPAREN ret_ty
+  { Tfun(opt_to_list $2,$6,$4) }
 
 
 
@@ -189,7 +189,7 @@ enum_path:
     { ($2,opt_to_list $3) }
 
 base_ty:
-| UID generics_params?  { Tconstr($1,opt_to_list $2) }
+| UID generics_params?  { Tvar($1,opt_to_list $2) }
 | TBOOL  { Tbool }
 | TCHAR  { Tchar}
 | TINT   { Tint }
