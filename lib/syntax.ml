@@ -8,7 +8,6 @@ type ty =
   | Tstring
   | Tlist of ty
   | Tptr of ty
-  | Tformat of ty * ty
   | Ttuple of ty list
   | Tconstr of string * ty list
   | Tenum of string * string list * (string * ty) list
@@ -109,12 +108,8 @@ and 'expr def =
   | Defenum of string * ty list * (string * ty) list
   | Deffun of string * ty list * ty * (string * ty) list * 'expr stmt
   | Defmethod of
-      string
-      * ty option
-      * ty list
-      * ty
-      * (string * ty) list
-      * 'expr stmt
+      string * ty option * ty list * ty * (string * ty) list * 'expr stmt
 [@@deriving show]
 
 type dl = expr def list [@@deriving show]
+type path = Normal of string | Method of string * ty
