@@ -88,6 +88,8 @@ rule token = parse
   { MINUS }
 | '!'
   { BANG }
+| '::'
+  { DOUBLECOLON }
 | ':'
   { COLON }
 | "--"
