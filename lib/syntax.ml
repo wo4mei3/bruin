@@ -111,4 +111,8 @@ and 'expr def =
 [@@deriving show]
 
 type dl = expr def list [@@deriving show]
+
 type path = Var of string * ty | Normal of ty | Method of string * ty
+[@@deriving show]
+
+type pl = path list [@@deriving show]

@@ -50,6 +50,7 @@ let make_tyenv dl =
 
 let rec assoc_env name = function
   | Syntax.Var (n, ty) :: _ when n = name -> ty
+  | Syntax.Normal (Syntax.Tvar (n, _) as ty) :: _ when n = name -> ty
   | Syntax.Normal (Syntax.Tenum (n, _, _) as ty) :: _ when n = name -> ty
   | Syntax.Normal (Syntax.Tstruct (n, _, _) as ty) :: _ when n = name -> ty
   | _ :: l -> assoc_env name l
@@ -120,18 +121,18 @@ and do_subst subst = function
       Syntax.Tenum (s, l, List.map (fun (s, t) -> (s, do_subst subst t)) f)
   | Syntax.Tstruct (s, l, f) ->
       Syntax.Tstruct (s, l, List.map (fun (s, t) -> (s, do_subst subst t)) f)
-  | Syntax.Tfun (l, r, p) ->
-      Syntax.Tfun (l, do_subst subst r, List.map (do_subst subst) p)
+  | Syntax.Tfun (_, r, p) ->
+      Syntax.Tfun ([], do_subst subst r, List.map (do_subst subst) p)
   | ty -> ty
 
 and assoc p = function
   | [] -> failwith "assoc"
   | (Syntax.Var (_, ty) as path) :: _ when Option.is_some (p path) ->
-      do_subst (Option.get (p path)) ty
+      (Option.get (p path), ty)
   | (Syntax.Normal ty as path) :: _ when Option.is_some (p path) ->
-      do_subst (Option.get (p path)) ty
+      (Option.get (p path), ty)
   | (Syntax.Method (_, ty) as path) :: _ when Option.is_some (p path) ->
-      do_subst (Option.get (p path)) ty
+      (Option.get (p path), ty)
   | _ :: l -> assoc p l
 
 and instantiate path tyl tyenv =
@@ -153,9 +154,8 @@ and instantiate path tyl tyenv =
         unify (tvar_to_ty tyenv ty) (tvar_to_ty tyenv obj_ty)
     | _ -> None
   in
-  print_endline "a";
-  let ty = assoc pred tyenv in
-  let subst = List.combine (get_typarams ty) tyl in
+  let subst, ty = assoc pred tyenv in
+  let subst = List.combine (get_typarams ty) tyl @ subst in
   do_subst subst ty
 
 let type_expr env = function
@@ -200,7 +200,8 @@ let rec type_stmt env = function
 let typing dl =
   let env = make_tyenv dl in
   match List.hd dl with
-  | Syntax.Deffun (_, _, _, _, stmt) ->
-      let s, _ = type_stmt env stmt in
+  | Syntax.Deffun (_, tyl, _, _, stmt) ->
+      let env1 = List.map (fun ty -> Syntax.Normal ty) tyl in
+      let s, _ = type_stmt (env1 @ env) stmt in
       s
   | _ -> SNone
