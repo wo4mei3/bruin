@@ -87,8 +87,10 @@ and make_tyenv tyenv' = function
       Syntax.Var (n, tvar_to_ty tyenv' ty) :: make_tyenv tyenv' xs
   | Syntax.Normal ty :: xs ->
       Syntax.Normal (tvar_to_ty tyenv' ty) :: make_tyenv tyenv' xs
-  | Syntax.Method (n, ty) :: xs ->
-      Syntax.Method (n, tvar_to_ty tyenv' ty) :: make_tyenv tyenv' xs
+  | Syntax.Member (n, ty) :: xs ->
+      Syntax.Member (n, tvar_to_ty tyenv' ty) :: make_tyenv tyenv' xs
+  | Syntax.Path (n, ty) :: xs ->
+      Syntax.Path (n, tvar_to_ty tyenv' ty) :: make_tyenv tyenv' xs
   | [] -> []
 
 and make_env dl =
@@ -146,7 +148,7 @@ and assoc p = function
       (Option.get (p path), ty)
   | (Syntax.Normal ty as path) :: _ when Option.is_some (p path) ->
       (Option.get (p path), ty)
-  | (Syntax.Method (_, ty) as path) :: _ when Option.is_some (p path) ->
+  | (Syntax.Member (_, ty) as path) :: _ when Option.is_some (p path) ->
       (Option.get (p path), ty)
   | _ :: l -> assoc p l
 
@@ -159,7 +161,7 @@ and instantiate path tyl tyenv =
     | Syntax.Normal ty, Syntax.Normal obj_ty
       when Option.is_some (unify ty obj_ty) ->
         unify ty obj_ty
-    | Syntax.Method (s1, ty), Syntax.Method (s2, obj_ty)
+    | Syntax.Member (s1, ty), Syntax.Member (s2, obj_ty)
       when s1 = s2 && Option.is_some (unify ty obj_ty) ->
         unify ty obj_ty
     | _ -> None

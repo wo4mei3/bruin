@@ -11,19 +11,3 @@ enum Option<T> {
   None;
 }
 
-
-impl Obj {
-    fn (Self*) method<T>(x:int, arr:int[]) -> T  {
-        let ptr:int* = 0;
-        while a> b {
-        }
-        for i in l {
-        }
-        switch e {
-            case _ : {
-                
-            }
-        }
-        
-    }
-}
