@@ -171,8 +171,8 @@ tag_spec:
 
 
 fn_ty:
- FN generics_params? LPAREN separated_list(COMMA, ty) RPAREN ret_ty
-  { Tfun(opt_to_list $2,$6,$4) }
+ FN LPAREN separated_list(COMMA, ty) RPAREN ret_ty
+  { Tfun([],$5,$3) }
 
 
 

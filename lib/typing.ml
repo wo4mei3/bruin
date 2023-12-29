@@ -44,10 +44,6 @@ let rec make_tyenv' = function
   | [] -> []
   | _ :: xs -> make_tyenv' xs
 
-let make_tyenv dl =
-  let tyenv = make_tyenv' dl in
-  tyenv
-
 let rec assoc_env name = function
   | Syntax.Var (n, ty) :: _ when n = name -> ty
   | Syntax.Normal (Syntax.Tvar (n, _) as ty) :: _ when n = name -> ty
@@ -65,20 +61,39 @@ let rec tvar_to_ty tyenv' = function
       let subst = List.combine (get_typarams ty) tyl in
       do_subst subst ty
   | Syntax.Tenum (name, tvars, fields') ->
+      let add_env = List.map (fun ty -> Syntax.Normal ty) tvars in
+      let env = add_env @ tyenv' in
       let fields =
-        List.map (fun (name, ty') -> (name, tvar_to_ty tyenv' ty')) fields'
+        List.map (fun (name, ty') -> (name, tvar_to_ty env ty')) fields'
       in
       Syntax.Tenum (name, tvars, fields)
   | Syntax.Tstruct (name, tvars, fields') ->
+      let add_env = List.map (fun ty -> Syntax.Normal ty) tvars in
+      let env = add_env @ tyenv' in
       let fields =
-        List.map (fun (name, ty') -> (name, tvar_to_ty tyenv' ty')) fields'
+        List.map (fun (name, ty') -> (name, tvar_to_ty env ty')) fields'
       in
       Syntax.Tstruct (name, tvars, fields)
   | Syntax.Tfun (tvars, ret_ty', params') ->
-      let ret_ty = tvar_to_ty tyenv' ret_ty' in
-      let params = List.map (tvar_to_ty tyenv') params' in
+      let add_env = List.map (fun ty -> Syntax.Normal ty) tvars in
+      let env = add_env @ tyenv' in
+      let ret_ty = tvar_to_ty env ret_ty' in
+      let params = List.map (tvar_to_ty env) params' in
       Syntax.Tfun (tvars, ret_ty, params)
   | ty -> ty
+
+and make_tyenv tyenv' = function
+  | Syntax.Var (n, ty) :: xs ->
+      Syntax.Var (n, tvar_to_ty tyenv' ty) :: make_tyenv tyenv' xs
+  | Syntax.Normal ty :: xs ->
+      Syntax.Normal (tvar_to_ty tyenv' ty) :: make_tyenv tyenv' xs
+  | Syntax.Method (n, ty) :: xs ->
+      Syntax.Method (n, tvar_to_ty tyenv' ty) :: make_tyenv tyenv' xs
+  | [] -> []
+
+and make_env dl =
+  let tyenv' = make_tyenv' dl in
+  make_tyenv tyenv' tyenv'
 
 and unify ty obj_ty =
   let rec aux ty obj_ty =
@@ -139,19 +154,14 @@ and instantiate path tyl tyenv =
   let pred path' =
     match (path, path') with
     | Syntax.Var (s1, ty), Syntax.Var (s2, obj_ty)
-      when s1 = s2
-           && Option.is_some
-                (unify (tvar_to_ty tyenv ty) (tvar_to_ty tyenv obj_ty)) ->
-        unify (tvar_to_ty tyenv ty) (tvar_to_ty tyenv obj_ty)
+      when s1 = s2 && Option.is_some (unify ty obj_ty) ->
+        unify ty obj_ty
     | Syntax.Normal ty, Syntax.Normal obj_ty
-      when Option.is_some
-             (unify (tvar_to_ty tyenv ty) (tvar_to_ty tyenv obj_ty)) ->
-        unify (tvar_to_ty tyenv ty) (tvar_to_ty tyenv obj_ty)
+      when Option.is_some (unify ty obj_ty) ->
+        unify ty obj_ty
     | Syntax.Method (s1, ty), Syntax.Method (s2, obj_ty)
-      when s1 = s2
-           && Option.is_some
-                (unify (tvar_to_ty tyenv ty) (tvar_to_ty tyenv obj_ty)) ->
-        unify (tvar_to_ty tyenv ty) (tvar_to_ty tyenv obj_ty)
+      when s1 = s2 && Option.is_some (unify ty obj_ty) ->
+        unify ty obj_ty
     | _ -> None
   in
   let subst, ty = assoc pred tyenv in
@@ -184,7 +194,7 @@ let rec type_stmt env = function
   | Syntax.SLet ((name, t), e) ->
       let ty, e, env = type_expr env e in
       print_endline (Syntax.show_ty t ^ " = " ^ Syntax.show_ty ty);
-      if t = ty then (Syntax.SLet ((name, ty), e), env)
+      if tvar_to_ty env t = ty then (Syntax.SLet ((name, ty), e), env)
       else failwith "type of lhs and rhs of let unmatched"
   | Syntax.SStmts l ->
       let env, l =
@@ -198,10 +208,11 @@ let rec type_stmt env = function
   | _ -> failwith "not_impl"
 
 let typing dl =
-  let env = make_tyenv dl in
+  let env = make_env dl in
   match List.hd dl with
   | Syntax.Deffun (_, tyl, _, _, stmt) ->
       let env1 = List.map (fun ty -> Syntax.Normal ty) tyl in
-      let s, _ = type_stmt (env1 @ env) stmt in
+      let env = make_tyenv (env1 @ env) env1 @ env in
+      let s, _ = type_stmt env stmt in
       s
   | _ -> SNone

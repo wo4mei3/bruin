@@ -1,5 +1,5 @@
-fn func<T>(e:T) -> T {
-    let ptr:fn (int) -> int = fn func<int>;
+fn func<S>(e:Option<S>) -> S {
+    let ptr:fn (Option<S>) -> S = fn func<S>;
 }
 
 struct Obj<T> {
