@@ -53,6 +53,7 @@
 %token LSHIFT_EQ
 %token RSHIFT_EQ
 *)
+%token DOUBLECOLON "::"
 %token LSHIFT "<<"
 %token RSHIFT ">>"
 %token EQEQ "=="
@@ -234,7 +235,7 @@ primary_expr:
 | LPAREN expr COMMA separated_nonempty_list(COMMA,expr) RPAREN { Etuple($2::$4) }
 | LPAREN expr RPAREN  { $2 }
 | LPAREN RPAREN  { Eunit }
-| LBRACE nonempty_list(field_expr) RBRACE  { Estruct $2 }
+| struct_path "::" LBRACE nonempty_list(field_expr) RBRACE  { Estruct $4 }
 | literal { Econstant $1 }
 
 
@@ -246,9 +247,9 @@ postfix1_expr:
 
 postfix2_expr:
 | postfix1_expr { $1 }
-| UID { Etag $1 }
-| UID LPAREN expr RPAREN { Econstruct($1,$3) }
-| UID LPAREN expr COMMA separated_nonempty_list(COMMA,expr) RPAREN { Econstruct($1,Etuple($3::$5)) }
+| enum_path "::" UID { Etag $3 }
+| enum_path "::" UID LPAREN expr RPAREN { Econstruct($3,$5) }
+| enum_path "::" UID LPAREN expr COMMA separated_nonempty_list(COMMA,expr) RPAREN { Econstruct($3,Etuple($5::$7)) }
 | postfix2_expr "." LID { EPostfix($1,PDot([],$3)) }
 | postfix2_expr "." FN LID generics_params { EPostfix($1,PDot($5,$4)) } 
 | postfix2_expr "." LID "(" separated_list(COMMA,expr) ")" 
@@ -261,7 +262,7 @@ postfix2_expr:
 
 
 unary_expr:
-| postfix2_expr  { $1 }
+| postfix2_expr  { $1  }
 | unary_operator postfix2_expr  { EUnary($1,$2) }
 | SIZEOF LPAREN ty RPAREN  { ESizeof($3) }
 
