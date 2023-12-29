@@ -235,7 +235,7 @@ primary_expr:
 | LPAREN expr COMMA separated_nonempty_list(COMMA,expr) RPAREN { Etuple($2::$4) }
 | LPAREN expr RPAREN  { $2 }
 | LPAREN RPAREN  { Eunit }
-| struct_path "::" LBRACE nonempty_list(field_expr) RBRACE  { Estruct $4 }
+| struct_path "::" LBRACE nonempty_list(field_expr) RBRACE  { Estruct(Tvar(fst $1,snd $1),$4) }
 | literal { Econstant $1 }
 
 
@@ -247,9 +247,9 @@ postfix1_expr:
 
 postfix2_expr:
 | postfix1_expr { $1 }
-| enum_path "::" UID { Etag $3 }
-| enum_path "::" UID LPAREN expr RPAREN { Econstruct($3,$5) }
-| enum_path "::" UID LPAREN expr COMMA separated_nonempty_list(COMMA,expr) RPAREN { Econstruct($3,Etuple($5::$7)) }
+| enum_path "::" UID { Etag(Tvar(fst $1,snd $1),$3) }
+| enum_path "::" UID LPAREN expr RPAREN { Econstruct(Tvar(fst $1,snd $1),$3,$5) }
+| enum_path "::" UID LPAREN expr COMMA separated_nonempty_list(COMMA,expr) RPAREN { Econstruct(Tvar(fst $1,snd $1),$3,Etuple($5::$7)) }
 | postfix2_expr "." LID { EPostfix($1,PDot([],$3)) }
 | postfix2_expr "." FN LID generics_params { EPostfix($1,PDot($5,$4)) } 
 | postfix2_expr "." LID "(" separated_list(COMMA,expr) ")" 
@@ -400,15 +400,20 @@ jump_statement:
 | BREAK ";" { SBreak }
 | RETURN  expr? ";" { SReturn $2 }
 
+field_pattern:
+| "." LID EQ pattern SEMICOLON
+  { ($2,$4) }
+
 pattern:
 | literal  { Pconstant $1 }
 | UNDERSCORE { Pwild }
 | LID { Pvar $1 }
-| UID { Ptag $1 }
+| enum_path "::" UID { Ptag(Tvar(fst $1,snd $1),$3) }
 | LPAREN RPAREN { Punit }
 | LPAREN pattern COMMA separated_nonempty_list(COMMA, pattern) RPAREN
   { Ptuple($2::$4) }
-| UID LPAREN pattern RPAREN
-  { Pconstruct($1,$3) }
-| UID LPAREN pattern COMMA separated_nonempty_list(COMMA, pattern) RPAREN
-  { Pconstruct($1,Ptuple($3::$5)) }
+| enum_path "::" UID LPAREN pattern RPAREN
+  { Pconstruct(Tvar(fst $1,snd $1),$3,$5) }
+| enum_path "::" UID LPAREN pattern COMMA separated_nonempty_list(COMMA, pattern) RPAREN
+  { Pconstruct(Tvar(fst $1,snd $1),$3,Ptuple($5::$7)) }
+| struct_path "::" LBRACE nonempty_list(field_pattern) RBRACE  { Pstruct(Tvar(fst $1,snd $1),$4) }

@@ -21,13 +21,13 @@ type expr =
   | Etuple of expr list
   | EBinary of binary * expr * expr
   | Eassign of expr * expr
-  | Etag of string
+  | Etag of ty * string
   | Eunit
-  | Econstruct of string * expr
+  | Econstruct of ty * string * expr
   | EUnary of unary * expr
   | ESizeof of ty
   | EPostfix of expr * expr postfix
-  | Estruct of (string * expr) list
+  | Estruct of ty * (string * expr) list
 [@@deriving show]
 
 and constant =
@@ -81,9 +81,9 @@ and pat =
   | Pcons of pat * pat
   | Pref of pat
   | Punit
-  | Ptag of string
-  | Pconstruct of string * pat
-  | Precord of (string * pat) list
+  | Ptag of ty * string
+  | Pconstruct of ty * string * pat
+  | Pstruct of ty * (string * pat) list
 [@@deriving show]
 
 and 'expr stmt =
@@ -112,7 +112,7 @@ and 'expr def =
 
 type dl = expr def list [@@deriving show]
 
-type path = Var of string * ty | Normal of ty | Member of string * ty | Path of string * ty
+type path = Var of string * ty | Normal of ty | Member of string * ty
 [@@deriving show]
 
 type pl = path list [@@deriving show]

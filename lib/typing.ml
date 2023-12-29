@@ -89,8 +89,6 @@ and make_tyenv tyenv' = function
       Syntax.Normal (tvar_to_ty tyenv' ty) :: make_tyenv tyenv' xs
   | Syntax.Member (n, ty) :: xs ->
       Syntax.Member (n, tvar_to_ty tyenv' ty) :: make_tyenv tyenv' xs
-  | Syntax.Path (n, ty) :: xs ->
-      Syntax.Path (n, tvar_to_ty tyenv' ty) :: make_tyenv tyenv' xs
   | [] -> []
 
 and make_env dl =
@@ -195,7 +193,8 @@ and 'expr stmt =
 let rec type_stmt env = function
   | Syntax.SLet ((name, t), e) ->
       let ty, e, env = type_expr env e in
-      print_endline (Syntax.show_ty (tvar_to_ty env t) ^ " = " ^ Syntax.show_ty ty);
+      print_endline
+        (Syntax.show_ty (tvar_to_ty env t) ^ " = " ^ Syntax.show_ty ty);
       if tvar_to_ty env t = ty then (Syntax.SLet ((name, ty), e), env)
       else failwith "type of lhs and rhs of let unmatched"
   | Syntax.SStmts l ->
